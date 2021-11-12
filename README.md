@@ -1,6 +1,6 @@
 # Jetson-Nano-temperature
 
-Bash script for measuring CPU and GPU temperature.
+Bash script for measuring CPU and GPU temperature and log it to a file every 30 seconds
 
 ### Download
 ```sh
