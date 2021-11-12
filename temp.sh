@@ -1,10 +1,19 @@
 #!/bin/bash
 
 FILE=thermal.log
+MAX_SIZE=5
+
 if [ -f "$FILE" ]; then
-    echo "$FILE exists."
+    echo "INFO: $FILE exists."
+    SIZE=$(du -k $FILE  | awk '{ print $1 }')
+    if (($SIZE >= $MAX_SIZE)) ; then 
+        echo "WARN: $FILE is more than 500 MBs! Truncating file..."
+        rm $FILE
+        echo "CPU,GPU,datetime" >> $FILE
+
+    fi
 else 
-    echo "$FILE does not exist. Adding header ..."
+    echo "INFO: $FILE does not exist. Adding header..."
     echo "CPU,GPU,datetime" >> $FILE
 fi
 
@@ -19,8 +28,21 @@ do
     DATE=$(date '+%Y-%m-%d %H:%M:%S')
     
     echo "$cpu,$gpu,$DATE" 
+    logger -p daemon.info -t ThermalLog "$cpu,$gpu,$DATE" 
     echo "$cpu,$gpu,$DATE" >> $FILE
-	sleep 30
+	sleep 0.05
+
+    if [ -f "$FILE" ]; then
+        SIZE=$(du -k $FILE  | awk '{ print $1 }')
+        if (($SIZE >= $MAX_SIZE)) ; then 
+            echo "WARN: $FILE is more than 500 MBs! Truncating file..."
+            rm $FILE
+            echo "CPU,GPU,datetime" >> $FILE
+        fi
+    else 
+        echo "INFO: $FILE does not exist. Adding header..."
+        echo "CPU,GPU,datetime" >> $FILE
+    fi
 done
 
 
